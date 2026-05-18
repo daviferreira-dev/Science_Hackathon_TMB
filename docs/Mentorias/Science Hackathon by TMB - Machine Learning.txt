@@ -1,0 +1,40 @@
+Ter um algoritmo q recebe inputs, colocar quais saídas esperadas e com base nos dados o modelo vai encontrar a função que dita os dados para o objetivo.
+
+Sistema que aprende padrão com dados pra apoiar/PREVER decisões.
+
+Etapas de funcionamento:
+	Coleta de dados - dados disponibilizados já, 3 arquivos
+	Pré-processamento de dados - Tratar os dados, normalização, ver se pode precisar ou não. A depender do Modelo pra verificar se será necessária. Olhar os dados, o objetivo e decidir o modelo pra ser trabalhado.
+	Divisão de dados - 
+	Escolha do algoritmo - Focar em qual modelo utilizar
+	Treinamento do modelo
+	Avaliação do modelo
+	Ajustes de parâmetros 
+	Implantação do modelo 
+	Monitoramento e manutenção
+	
+	Paradigma de aprendizado:
+		Learning Paradigm: Supervised, Unsupervised e Reinforcement
+		O supervisionado chama muita atenção (classificar fpds, 0 e 1, probabilidade), trabalhar com modelos supervisionados.
+		
+	3 modelos q podemos usar: Deep Learning, Ensemble Methods, Regressão, o modelo deve ser de acordo com o objetivo (classificar fpds, 0 e 1, probabilidade)
+	Regressão Logistica como baseline
+	Cada algoritmo foca em uma coisa só, focar de novo no objetivo de classificação.	
+	Sugestão de início pra ter base: regressão logística, lightGBM (ver quais modelos eles já testaram, ler o algoritmo e encontrar um bom modelo pra trabalhar)
+	
+	Treinamento do modelo - trabalhar com Python (libs prontas pra trabalhar) - Generalizar os dados bem, sem picos ou declives. overfitting 
+		Separar dados - Treino, validação e teste
+		Sem Leakage - Somente dados disponíveis ate o modelo validar o FPDs
+		Valolres ausentes - Tratar dados faltantes.
+		Variáveis categóricas - Converter textos em números
+		Normalização - Pesos fielmente distribuídos - Fine Tunnning do nosso modelo
+		Desbalanceamento - Ajustar diferenças de classes
+		Baseline - Começar com um modelo simples, ter o mínimo e aumentar complexidade. Agile Methods
+		Comparação de modelos - Usar a mesma métrica para comparar vários modelos, todo modelo q for treinar ou testar usar a mesma comparação, avaliar da mesma forma todos modelos (Óbvio)
+		Fine tunning - Ajustar hiper parâmetros do modelo, acrescentando e testando parâmetros.
+		Overfitting - Evitar decorar o treino. Modelo q não generaliza bem, ele começou a decorar os pontos ao invés de tracar uma linha entre os pontos.
+		Probabilidade - Gerar a probabilidade com traceroute 
+	
+	Avaliação de modelo - ROC AUC
+		Classificar o máximo possível como certo.
+		
