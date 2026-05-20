@@ -48,6 +48,7 @@ hackathon-tmb-fpd/
 ├── submissao.xlsx             # Base de teste para predição (23.354 registros)
 ├── tmb.ipynb                  # Pipeline completo end-to-end
 ├── submissao_final.csv        # Saída gerada: pedido_id, prob_fpd, faixa_risco
+├── politica_cobranca.docx     # Política de cobrança operacional por faixa de risco
 ├── requirements.txt
 └── README.md
 ```
@@ -117,7 +118,7 @@ pip install pandas numpy scikit-learn xgboost lightgbm imbalanced-learn optuna s
 ```
 
 ### 3. Posicione os arquivos de dados
-Coloque na raiz do projeto (ou na pasta `data/`) os arquivos fornecidos pelo desafio:
+Coloque na raiz do projeto os arquivos fornecidos pelo desafio:
 - `basetreinamento.xlsx` — base histórica rotulada
 - `submissao.xlsx` — base de teste para predição
 
@@ -125,7 +126,7 @@ Coloque na raiz do projeto (ou na pasta `data/`) os arquivos fornecidos pelo des
 
 ### 4. Execute o notebook
 ```bash
-jupyter notebook notebooks/tmb.ipynb
+jupyter notebook tmb.ipynb
 ```
 
 > Execute as células em ordem (1 → 38). O pipeline completo leva ~10–15 minutos em uma máquina padrão; a etapa de tuning com Optuna concentra a maior parte do tempo.
@@ -139,14 +140,45 @@ Ao final da execução, será gerado:
 
 ## Política de cobrança proposta
 
-| Faixa | `prob_fpd` | Taxa FPD observada | Lift | Ação operacional |
-|---|---|---|---|---|
-| **Baixo** | < 0,1266 | 0,72% | 0,06x | E-mail preventivo automatizado em D+1 |
-| **Médio** | 0,1266 – 0,3472 | 4,94% | 0,41x | SMS + e-mail em D+1 e D+3 |
-| **Alto** | 0,3472 – 0,5818 | 13,33% | 1,11x | Ligação ativa entre D+1 e D+5 + oferta de renegociação |
-| **Crítico** | ≥ 0,5818 | 28,95% | 2,42x | Agente humano em D+1 + análise de negativação a partir de D+30 |
+A política traduz o score em ações operacionais segmentadas em 4 faixas, com condições comerciais diferenciadas (entrada, prazo, juros) e canais de cobrança escalados por risco. Documento completo em `politica_cobranca.docx`.
 
-> Cortes derivados dos percentis 25/50/75 da distribuição de scores no conjunto de teste — escolhidos para garantir **volume operacional previsível** (~25% da base por faixa) e **lift monotônico crescente** (0,06 → 0,41 → 1,11 → 2,42).
+### Faixas de risco
+
+| Faixa | `prob_fpd` | Taxa FPD observada | Lift | Volume na base |
+|---|---|---|---|---|
+| **Baixo** | < 0,1266 | 0,72% | 0,06x | ~25% (4.999 pedidos) |
+| **Médio** | 0,1266 – 0,3472 | 4,94% | 0,41x | ~25% (5.001 pedidos) |
+| **Alto** | 0,3472 – 0,5818 | 13,33% | 1,11x | ~25% (4.998 pedidos) |
+| **Crítico** | ≥ 0,5818 | 28,95% | 2,42x | ~25% (5.002 pedidos) |
+
+> Cortes derivados dos percentis 25/50/75 da distribuição de scores no conjunto de teste — escolhidos para garantir **volume operacional previsível** (~25% da base por faixa) e **lift monotônico crescente** (0,06 → 0,41 → 1,11 → 2,42). As faixas Alto + Crítico concentram ~80% de todos os FPDs.
+
+### Condições comerciais por faixa
+
+| Parâmetro | Baixo | Médio | Alto | Crítico |
+|---|---|---|---|---|
+| **Entrada mínima** | 0% | 10% | 20% | 40% |
+| **Prazo máximo** | 48x | 36x | 24x | 12x |
+| **Taxa de juros** | Base | Base + 2–4 p.p. | Base + 5–8 p.p. | Base + 10–15 p.p. |
+| **Documentação extra** | — | — | Comprovante de renda | Garantia / avalista |
+| **Decisão** | Aprovação automática | Aprovação com lembretes | Aprovação com contato ativo | Análise manual obrigatória |
+
+### Canal e timing de cobrança
+
+| Faixa | Canal | Frequência | Critério de escalada |
+|---|---|---|---|
+| **Baixo** | E-mail / SMS automatizado | Apenas no vencimento | — |
+| **Médio** | WhatsApp / SMS automatizado | 3 dias antes + no vencimento | Não pagamento da 1ª parcela |
+| **Alto** | Telefone (URA ou atendente) | Semanal até quitação da 1ª parcela | Contato não atendido ou 1º atraso |
+| **Crítico** | Gerente sênior (ligação + e-mail) | Diária até definição | Imediata para supervisor |
+
+### Matriz de escalada pós-vencimento
+
+| Situação | Ação | Prazo | Responsável |
+|---|---|---|---|
+| 1º atraso (qualquer faixa) | Ligação | D+1 do vencimento | Cobrança |
+| 2º atraso | Negociação | D+3 do vencimento | Supervisor |
+| 3º atraso | Encaminhar jurídico | D+15 do vencimento | Jurídico |
 
 ---
 
@@ -166,7 +198,6 @@ Ao final da execução, será gerado:
 - **TMB Fintech** — dados operacionais reais de checkout, fornecidos sob acordo de confidencialidade aos participantes do hackathon.
 - **Período:** vendas anteriores a 31/07/2025.
 - **Volume:** 99.999 registros rotulados (treino) + 23.354 registros para predição (submissão).
-- Documentação do desafio disponível em `docs/PDFHACKATON.pdf`.
 
 ---
 
